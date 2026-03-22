@@ -1,4 +1,4 @@
-// +build dummy
+//go:build dummy
 
 // Package c contains only a C file.
 //

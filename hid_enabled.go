@@ -4,8 +4,7 @@
 // This file is released under the 3-clause BSD license. Note however that Linux
 // support depends on libusb, released under LGNU GPL 2.1 or later.
 
-//go:build (freebsd && cgo) || (linux && cgo) || (darwin && !ios && cgo) || (windows && cgo)
-// +build freebsd,cgo linux,cgo darwin,!ios,cgo windows,cgo
+//go:build cgo && (unix || windows) && !ios
 
 // Package hid provides an interface for USB HID devices.
 package hid
@@ -40,6 +39,7 @@ specifically for the linux platform, below.
 #endif
 
 #ifdef OS_LINUX
+	#include "libusbi.h"
 	#include "os/events_posix.h"
 	#include "os/threads_posix.h"
 
@@ -67,7 +67,7 @@ specifically for the linux platform, below.
 	#include <stdlib.h>
 	#include <wchar.h>
 	#include <hidapi/hidapi.h>
-#elif DOS_OPENBSD
+#elif OS_OPENBSD
 	#include "hidapi/libusb/hid.c"
 #endif
 

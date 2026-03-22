@@ -15,16 +15,16 @@
 package main
 
 import (
-	_ "github.com/karalabe/hid/hidapi"
-	_ "github.com/karalabe/hid/hidapi/hidapi"
-	_ "github.com/karalabe/hid/hidapi/hidtest"
-	_ "github.com/karalabe/hid/hidapi/libusb"
-	_ "github.com/karalabe/hid/hidapi/linux"
-	_ "github.com/karalabe/hid/hidapi/mac"
-	_ "github.com/karalabe/hid/hidapi/netbsd"
-	_ "github.com/karalabe/hid/hidapi/pc"
-	_ "github.com/karalabe/hid/hidapi/windows"
-	_ "github.com/karalabe/hid/libusb"
-	_ "github.com/karalabe/hid/libusb/libusb"
-	_ "github.com/karalabe/hid/libusb/libusb/os"
+	_ "github.com/matu6968/hid/hidapi"
+	_ "github.com/matu6968/hid/hidapi/hidapi"
+	_ "github.com/matu6968/hid/hidapi/hidtest"
+	_ "github.com/matu6968/hid/hidapi/libusb"
+	_ "github.com/matu6968/hid/hidapi/linux"
+	_ "github.com/matu6968/hid/hidapi/mac"
+	_ "github.com/matu6968/hid/hidapi/netbsd"
+	_ "github.com/matu6968/hid/hidapi/pc"
+	_ "github.com/matu6968/hid/hidapi/windows"
+	_ "github.com/matu6968/hid/libusb"
+	_ "github.com/matu6968/hid/libusb/libusb"
+	_ "github.com/matu6968/hid/libusb/libusb/os"
 )

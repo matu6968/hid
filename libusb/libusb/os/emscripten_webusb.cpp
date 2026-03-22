@@ -586,12 +586,17 @@ unsigned long getDeviceSessionId(val& web_usb_device) {
 }
 
 val getDeviceList(libusb_context* ctx, discovered_devs** devs) {
+	// Check if browser supports USB
+	val navigator_usb = val::global("navigator")["usb"];
+	if (navigator_usb == val::undefined()) {
+		co_return (int) LIBUSB_ERROR_NOT_SUPPORTED;
+	}
 	// C++ equivalent of `await navigator.usb.getDevices()`. Note: at this point
 	// we must already have some devices exposed - caller must have called
 	// `await navigator.usb.requestDevice(...)` in response to user interaction
 	// before going to LibUSB. Otherwise this list will be empty.
 	auto web_usb_devices =
-		co_await_try(val::global("navigator")["usb"].call<val>("getDevices"));
+		co_await_try(navigator_usb.call<val>("getDevices"));
 	for (auto&& web_usb_device : web_usb_devices) {
 		auto session_id = getDeviceSessionId(web_usb_device);
 
@@ -701,7 +706,7 @@ int em_get_config_descriptor_by_value(libusb_device* dev,
 }
 
 int em_set_configuration(libusb_device_handle* dev_handle, int config) {
-	return WebUsbDevicePtr(dev_handle)->awaitOnMain("setConfiguration", config);
+	return WebUsbDevicePtr(dev_handle)->awaitOnMain("selectConfiguration", config);
 }
 
 int em_claim_interface(libusb_device_handle* handle, uint8_t iface) {
@@ -844,7 +849,7 @@ int em_handle_transfer_completion(usbi_transfer* itransfer) {
 #pragma clang diagnostic ignored "-Wmissing-field-initializers"
 extern "C" const usbi_os_backend usbi_backend = {
 	.name = "Emscripten + WebUSB backend",
-	.caps = LIBUSB_CAP_HAS_CAPABILITY,
+	.caps = 0,
 	.get_device_list = em_get_device_list,
 	.open = em_open,
 	.close = em_close,
