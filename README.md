@@ -16,27 +16,34 @@ cases where devices support this ligher mode of operation (e.g. input devices, h
 
 The package wraps [`hidapi`](https://github.com/libusb/hidapi) for accessing OS specific USB HID APIs
 directly instead of using low level USB constructs, which might have permission issues on some platforms.
-The `hidapi` dependency is vendored directly into the repository and wrapped using CGO, making the `hid` package self-contained
-and go-gettable.
+The `hidapi` dependency is vendored directly into the repository and wrapped using CGO (or ccgo/purego for targets that support CGO less operation), making the `hid` package self-contained and go-gettable.
 
-Supported platforms at the moment are Linux, macOS and Windows (exclude constraints are also specified
-for Android and iOS to allow smoother vendoring into cross platform projects).
+Supported platforms at the moment are Linux, macOS, Windows, majority of BSD platforms and Android (exclude constraints are also specified for iOS to allow smoother vendoring into cross platform projects).
 
 The `hidapi` on linux unfortunately requires `libuddev` (`libudev-dev` on ubuntu, `systemd-devel` on fedora). Therefore, 
 this library includes [`libusb`](https://github.com/libusb/libusb) which we use as a backend on `linux`, and thus avoid 
 runtime dependencies.
 
+## API differences from `github.com/karalabe/hid`
+
+This fork is intended to stay close to upstream but fixes a few sharp edges for embedders:
+
+- **`Enumerate(vid, pid)` returns `([]DeviceInfo, error)`** — propagation of enumeration failures (e.g. transient USB errors) instead of only `[]DeviceInfo`.
+- **`Device` is an interface** — store opened handles as **`hid.Device`**, not **`*hid.Device`**. A pointer to an interface is almost never what you want and will not implement `Device`.
+
+When **`CGO_ENABLED=0`** (or unsupported OS), the stub implementation in `hid_disabled.go` is used: `Supported()` is false and `Enumerate` returns empty results with a nil error unless extended later for a CGO-less backend.
 
 ## Cross-compiling
 
-Using `go get` the embedded C library is compiled into the binary format of your host OS. Cross compiling to a different platform or architecture entails disabling CGO by default in Go, causing device enumeration `hid.Enumerate()` to yield no results.
+Using `go get` the embedded C library is compiled into the binary format of your host OS. Cross compiling to a different platform or architecture entails disabling CGO by default in Go.
+This library supports CGO less operation by using a transpiled libusb driver via [ccgo](https://gitlab.com/cznic/ccgo). 
 
-To cross compile a functional version of this library, you'll need to enable CGO during cross compilation via `CGO_ENABLED=1` and you'll need to install and set a cross compilation enabled C toolkit via `CC=your-cross-gcc`.
+To cross compile a functional version of this library simply disable CGO and you should be ready, on targets/architectures not supported by ccgo you'll need to enable CGO during cross compilation via `CGO_ENABLED=1` and you'll need to install and set a cross compilation enabled C toolkit via `CC=your-cross-gcc`.
 
 ## Acknowledgements
 
 Although the `hid` package is an implementation from scratch, it was heavily inspired by the existing
-[`go.hid`](https://github.com/GeertJohan/go.hid) library, which seems abandoned since 2015; is incompatible
+[`hid`](https://github.com/karalabe/hid) library, which seems abandoned since 2022 and the [`go.hid`](https://github.com/GeertJohan/go.hid) library, which seems abandoned since 2015; is incompatible
 with Go 1.6+; and has various external dependencies. Given its inspirational roots, I thought it important
 to give credit to the author of said package too.
 
